@@ -1,49 +1,36 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Briefcase, Bookmark, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-export const Header = ({ savedJobsCount = 0, onUpdateCount }) => {
+export const Header = ({ savedJobsCount = 0, onRemoveSaved }) => {
   const [savedJobs, setSavedJobs] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Load saved jobs from localStorage
   const loadSavedJobs = () => {
-    const stored = localStorage.getItem("savedJobs");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setSavedJobs(parsed);
-      if (onUpdateCount) onUpdateCount(parsed.length);
-    } else {
+    try {
+      const stored = localStorage.getItem("savedJobs");
+      setSavedJobs(stored ? JSON.parse(stored) : []);
+    } catch {
       setSavedJobs([]);
-      if (onUpdateCount) onUpdateCount(0);
     }
   };
 
-  // Open modal and refresh data
   const handleViewSaved = () => {
     loadSavedJobs();
     setIsOpen(true);
   };
 
-  // Remove single job
   const handleRemove = (id) => {
     const updated = savedJobs.filter((job) => job.id !== id);
     localStorage.setItem("savedJobs", JSON.stringify(updated));
     setSavedJobs(updated);
-    if (onUpdateCount) onUpdateCount(updated.length);
+    if (onRemoveSaved) onRemoveSaved(updated.length);
   };
-
-  // Sync if localStorage changes in another tab
-  useEffect(() => {
-    window.addEventListener("storage", loadSavedJobs);
-    return () => window.removeEventListener("storage", loadSavedJobs);
-  }, []);
 
   return (
     <>
-      {/* Header */}
       <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -78,9 +65,8 @@ export const Header = ({ savedJobsCount = 0, onUpdateCount }) => {
         </div>
       </motion.header>
 
-      {/* Modal */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-card w-full max-w-lg rounded-xl p-6 shadow-xl relative">
             <button
               className="absolute top-3 right-3"
@@ -96,11 +82,11 @@ export const Header = ({ savedJobsCount = 0, onUpdateCount }) => {
                 No saved jobs yet.
               </p>
             ) : (
-              <div className="space-y-4 max-h-96 overflow-y-auto">
+              <div className="space-y-3 max-h-80 overflow-y-auto">
                 {savedJobs.map((job) => (
                   <div
                     key={job.id}
-                    className="border rounded-lg p-4 space-y-3"
+                    className="border rounded-lg p-3 flex justify-between items-center"
                   >
                     <div>
                       <p className="font-medium">{job.title}</p>
@@ -109,28 +95,13 @@ export const Header = ({ savedJobsCount = 0, onUpdateCount }) => {
                       </p>
                     </div>
 
-                    <div className="flex gap-2">
-                      {/* Apply Now Button */}
-                      <a
-                        href={job.applyLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1"
-                      >
-                        <Button size="sm" className="w-full">
-                          Apply Now
-                        </Button>
-                      </a>
-
-                      {/* Remove Button */}
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleRemove(job.id)}
-                      >
-                        Remove
-                      </Button>
-                    </div>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleRemove(job.id)}
+                    >
+                      Remove
+                    </Button>
                   </div>
                 ))}
               </div>
