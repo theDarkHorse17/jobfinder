@@ -26,8 +26,9 @@ export default function HomePage() {
     setHasSearched(true);
     
     try {
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
       const queryParams = new URLSearchParams(searchParams).toString();
-      const response = await fetch(`/api/jobs?${queryParams}`);
+      const response = await fetch(`${BACKEND_URL}/api/jobs?${queryParams}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch jobs');
