@@ -4,6 +4,10 @@ from pydantic import BaseModel
 import os
 import httpx
 from typing import Optional, List
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = FastAPI()
 
