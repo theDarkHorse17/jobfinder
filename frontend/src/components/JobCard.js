@@ -19,13 +19,15 @@ export const JobCard = ({ job, onSave, isSaved }) => {
   };
 
   const handleSave = () => {
-    onSave(job);
-    if (!isSaved) {
-      toast.success('Job saved!');
-    } else {
-      toast.info('Job removed from saved');
-    }
-  };
+  const wasSaved = isSaved;   // capture current state
+  onSave(job);
+
+  if (!wasSaved) {
+    toast.success('Job saved!');
+  } else {
+    toast.info('Job removed from saved');
+  }
+};
 
   return (
     <motion.div
